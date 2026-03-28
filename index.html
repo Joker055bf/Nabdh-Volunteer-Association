@@ -3,142 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصتي | دخول وتسجيل</title>
+    <title>نظام الإدارة والمبادرات</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; position: relative; text-align: center; }
-        
-        h2 { color: #333; margin-bottom: 25px; }
+        :root { --admin: #dc2626; --chief: #059669; --vol: #2563eb; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; position: relative; }
+        h2 { text-align: center; color: #333; }
         .input-group { text-align: right; margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        
-        .main-btn { width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
-        .main-btn:hover { background: #4338ca; }
-        
-        .footer-text { margin-top: 20px; font-size: 14px; color: #666; }
-        .link-btn { background: none; border: none; color: #4f46e5; cursor: pointer; font-weight: bold; text-decoration: underline; padding: 0; font-size: 14px; }
-        
-        .logout-btn { position: absolute; top: 15px; left: 15px; background: #ef4444; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-
-        /* خيارات المتطوع والعضو */
-        .role-box { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; background: #f8f9fa; padding: 10px; border-radius: 8px; }
-        
-        /* إخفاء الأقسام */
-        #signup-area, #home-area, #member-code-div { display: none; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; color: white; font-size: 16px; }
+        .btn-blue { background: var(--vol); } .btn-red { background: var(--admin); } .btn-green { background: var(--chief); }
+        .logout-btn { position: absolute; top: 10px; left: 10px; background: #6b7280; padding: 5px 12px; font-size: 12px; width: auto; margin: 0; }
+        .hidden { display: none; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; color: white; margin-bottom: 10px; }
+        .init-card { background: #f8fafc; border-right: 5px solid var(--chief); padding: 15px; margin-top: 15px; border-radius: 8px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
-    <!-- 1. واجهة تسجيل الدخول (أول شيء يظهر) -->
-    <div class="card" id="login-area">
+    <!-- 1. واجهة تسجيل الدخول -->
+    <div id="login-screen" class="card">
         <h2>تسجيل الدخول</h2>
-        <div class="input-group">
-            <label>الاسم</label>
-            <input type="text" id="login-user" placeholder="أدخل اسمك">
-        </div>
-        <div class="input-group">
-            <label>كلمة المرور</label>
-            <input type="password" id="login-pass" placeholder="••••••••">
-        </div>
-        <button class="main-btn" onclick="processLogin()">دخول</button>
-        <div class="footer-text">
-            ليس لديك حساب؟ <button class="link-btn" onclick="showSignup()">سجل الآن</button>
-        </div>
+        <div class="input-group"><label>الاسم</label><input type="text" id="login-user" placeholder="أدخل اسمك"></div>
+        <div class="input-group"><label>كلمة المرور</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+        <button class="btn-blue" onclick="handleLogin()">دخول</button>
+        <p style="text-align:center">ليس لديك حساب؟ <a href="#" onclick="showScreen('signup-screen')">سجل الآن</a></p>
     </div>
 
-    <!-- 2. واجهة إنشاء حساب جديد -->
-    <div class="card" id="signup-area">
+    <!-- 2. واجهة إنشاء حساب (متطوع أو إدارة) -->
+    <div id="signup-screen" class="card hidden">
         <h2>إنشاء حساب جديد</h2>
         <div class="input-group">
             <label>نوع الحساب</label>
-            <div class="role-box">
-                <label><input type="radio" name="role" value="v" checked onclick="toggleMemberField(false)"> متطوع</label>
-                <label><input type="radio" name="role" value="m" onclick="toggleMemberField(true)"> عضو</label>
-            </div>
+            <select id="reg-role" onchange="checkAdminField()">
+                <option value="volunteer">متطوع</option>
+                <option value="admin">الإدارة</option>
+            </select>
         </div>
-        <div class="input-group">
-            <label>الاسم الكامل</label>
-            <input type="text" id="reg-user" placeholder="اكتب اسمك">
+        <!-- حقل الرمز السري المخفي -->
+        <div id="admin-secret" class="input-group hidden">
+            <label style="color:var(--admin)">رمز الإدارة السري</label>
+            <input type="password" id="admin-code" placeholder="أدخل الرمز الخاص">
         </div>
-        <div class="input-group">
-            <label>كلمة المرور</label>
-            <input type="password" id="reg-pass" placeholder="اختر كلمة مرور">
-        </div>
-        <div class="input-group" id="member-code-div">
-            <label style="color:red">الرمز السري للعضو (7480)</label>
-            <input type="text" id="member-code" placeholder="أدخل الرمز">
-        </div>
-        <button class="main-btn" onclick="processSignup()">تأكيد التسجيل والدخول</button>
-        <div class="footer-text">
-            لديك حساب بالفعل؟ <button class="link-btn" onclick="showLogin()">تسجيل دخول</button>
-        </div>
+        <div class="input-group"><label>الاسم الكامل</label><input type="text" id="reg-name"></div>
+        <div class="input-group"><label>كلمة المرور</label><input type="password" id="reg-pass"></div>
+        <button class="btn-blue" onclick="handleSignup()">تأكيد التسجيل</button>
+        <button style="background:none; color:blue; text-decoration:underline;" onclick="showScreen('login-screen')">العودة للدخول</button>
     </div>
 
-    <!-- 3. واجهة الصفحة الرئيسية (بعد النجاح) -->
-    <div class="card" id="home-area">
+    <!-- 3. لوحة تحكم الإدارة (لإنشاء رئيس المجموعة) -->
+    <div id="admin-dashboard" class="card hidden">
         <button class="logout-btn" onclick="location.reload()">خروج</button>
-        <div style="font-size: 50px; margin-bottom: 10px;">👤</div>
-        <h2 id="welcome-name"></h2>
-        <p>مرحباً بك في لوحة التحكم الخاصة بك كـ <span id="user-role-text" style="font-weight:bold; color:#4f46e5;"></span></p>
+        <span class="badge" style="background:var(--admin)">لوحة الإدارة</span>
+        <h3>إنشاء حساب رئيس مجموعة</h3>
+        <div class="input-group"><label>اسم رئيس المجموعة</label><input type="text" id="chief-name"></div>
+        <div class="input-group"><label>كلمة مرور الرئيس</label><input type="password" id="chief-pass"></div>
+        <button class="btn-red" onclick="createChief()">اعتماد رئيس المجموعة</button>
+    </div>
+
+    <!-- 4. لوحة تحكم رئيس المجموعة (إضافة مبادرات) -->
+    <div id="chief-dashboard" class="card hidden">
+        <button class="logout-btn" onclick="location.reload()">خروج</button>
+        <span class="badge" style="background:var(--chief)">رئيس المجموعة</span>
+        <h3>إضافة مبادرة جديدة</h3>
+        <div class="input-group"><label>عنوان المبادرة</label><input type="text" id="init-title"></div>
+        <div class="input-group"><label>التفاصيل</label><textarea id="init-desc" rows="3"></textarea></div>
+        <button class="btn-green" onclick="addInitiative()">نشر المبادرة للمتطوعين</button>
+    </div>
+
+    <!-- 5. واجهة المتطوع (مشاهدة المبادرات) -->
+    <div id="vol-dashboard" class="card hidden">
+        <button class="logout-btn" onclick="location.reload()">خروج</button>
+        <span class="badge" style="background:var(--vol)">حساب متطوع</span>
+        <h2 id="vol-welcome"></h2>
+        <hr>
+        <h3 style="text-align:right">المبادرات المتاحة:</h3>
+        <div id="initiatives-list">
+            <p style="color:#666; text-align:center;">لا توجد مبادرات منشورة حالياً.</p>
+        </div>
     </div>
 
     <script>
-        // وظائف التنقل
-        function showSignup() {
-            document.getElementById('login-area').style.display = 'none';
-            document.getElementById('signup-area').style.display = 'block';
+        // تخزين مؤقت للبيانات
+        let savedChief = JSON.parse(localStorage.getItem('chiefAccount'));
+        let initiatives = JSON.parse(localStorage.getItem('initiatives')) || [];
+
+        function showScreen(id) {
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        function showLogin() {
-            document.getElementById('signup-area').style.display = 'none';
-            document.getElementById('login-area').style.display = 'block';
+        function checkAdminField() {
+            const role = document.getElementById('reg-role').value;
+            document.getElementById('admin-secret').classList.toggle('hidden', role !== 'admin');
         }
 
-        function toggleMemberField(isMember) {
-            document.getElementById('member-code-div').style.display = isMember ? 'block' : 'none';
+        function handleSignup() {
+            const role = document.getElementById('reg-role').value;
+            const code = document.getElementById('admin-code').value;
+            if(role === 'admin' && code !== '7480') {
+                alert("رمز الإدارة خاطئ!");
+                return;
+            }
+            alert("تم التسجيل بنجاح! سجل دخولك الآن.");
+            showScreen('login-screen');
         }
 
-        // تسجيل الدخول العادي
-        function processLogin() {
+        function handleLogin() {
             const user = document.getElementById('login-user').value;
             const pass = document.getElementById('login-pass').value;
-            if(user && pass) {
-                goToHome(user, "مستخدم");
+
+            if (user === "ادارة" || user === "الإدارة") {
+                showScreen('admin-dashboard');
+            } else if (savedChief && user === savedChief.name && pass === savedChief.pass) {
+                showScreen('chief-dashboard');
             } else {
-                alert("يرجى تعبئة بيانات الدخول");
+                showScreen('vol-dashboard');
+                document.getElementById('vol-welcome').innerText = "أهلاً بك يا " + user;
+                renderInitiatives();
             }
         }
 
-        // إنشاء حساب جديد
-        function processSignup() {
-            const user = document.getElementById('reg-user').value;
-            const pass = document.getElementById('reg-pass').value;
-            const isMember = document.querySelector('input[name="role"]:checked').value === 'm';
-            const code = document.getElementById('member-code').value;
-
-            if(!user || !pass) {
-                alert("يرجى إكمال الحقول");
-                return;
-            }
-
-            if(isMember && code !== '7480') {
-                alert("خطأ: الرمز السري للعضو هو 7480");
-                return;
-            }
-
-            goToHome(user, isMember ? "عضو" : "متطوع");
+        function createChief() {
+            const name = document.getElementById('chief-name').value;
+            const pass = document.getElementById('chief-pass').value;
+            if(!name || !pass) return alert("أكمل البيانات!");
+            
+            const chief = { name, pass };
+            localStorage.setItem('chiefAccount', JSON.stringify(chief));
+            savedChief = chief;
+            alert("تم إنشاء حساب رئيس المجموعة بنجاح!");
         }
 
-        // الدخول للموقع
-        function goToHome(name, role) {
-            document.getElementById('login-area').style.display = 'none';
-            document.getElementById('signup-area').style.display = 'none';
-            document.getElementById('home-area').style.display = 'block';
-            document.getElementById('welcome-name').innerText = "أهلاً " + name;
-            document.getElementById('user-role-text').innerText = role;
+        function addInitiative() {
+            const title = document.getElementById('init-title').value;
+            const desc = document.getElementById('init-desc').value;
+            if(!title || !desc) return alert("اكتب تفاصيل المبادرة!");
+
+            initiatives.push({ title, desc });
+            localStorage.setItem('initiatives', JSON.stringify(initiatives));
+            alert("تم نشر المبادرة للمتطوعين!");
+            document.getElementById('init-title').value = "";
+            document.getElementById('init-desc').value = "";
+        }
+
+        function renderInitiatives() {
+            const list = document.getElementById('initiatives-list');
+            if(initiatives.length === 0) return;
+            list.innerHTML = initiatives.map(i => `
+                <div class="init-card">
+                    <strong>${i.title}</strong>
+                    <p style="margin:5px 0; font-size:14px; color:#444;">${i.desc}</p>
+                </div>
+            `).reverse().join(''); // عرض الأحدث أولاً
         }
     </script>
-
 </body>
 </html>
