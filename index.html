@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الإدارة والمبادرات</title>
+    <title>نظام الإدارة المتطور</title>
     <style>
         :root { --admin: #dc2626; --chief: #059669; --vol: #2563eb; }
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
@@ -17,7 +17,7 @@
         .logout-btn { position: absolute; top: 10px; left: 10px; background: #6b7280; padding: 5px 12px; font-size: 12px; width: auto; margin: 0; }
         .hidden { display: none; }
         .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; color: white; margin-bottom: 10px; }
-        .init-card { background: #f8fafc; border-right: 5px solid var(--chief); padding: 15px; margin-top: 15px; border-radius: 8px; text-align: right; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .init-card { background: #f8fafc; border-right: 5px solid var(--chief); padding: 15px; margin-top: 15px; border-radius: 8px; text-align: right; }
     </style>
 </head>
 <body>
@@ -25,13 +25,13 @@
     <!-- 1. واجهة تسجيل الدخول -->
     <div id="login-screen" class="card">
         <h2>تسجيل الدخول</h2>
-        <div class="input-group"><label>الاسم</label><input type="text" id="login-user" placeholder="أدخل اسمك"></div>
-        <div class="input-group"><label>كلمة المرور</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+        <div class="input-group"><label>الاسم</label><input type="text" id="login-user"></div>
+        <div class="input-group"><label>كلمة المرور</label><input type="password" id="login-pass"></div>
         <button class="btn-blue" onclick="handleLogin()">دخول</button>
         <p style="text-align:center">ليس لديك حساب؟ <a href="#" onclick="showScreen('signup-screen')">سجل الآن</a></p>
     </div>
 
-    <!-- 2. واجهة إنشاء حساب (متطوع أو إدارة) -->
+    <!-- 2. واجهة إنشاء حساب -->
     <div id="signup-screen" class="card hidden">
         <h2>إنشاء حساب جديد</h2>
         <div class="input-group">
@@ -41,10 +41,9 @@
                 <option value="admin">الإدارة</option>
             </select>
         </div>
-        <!-- حقل الرمز السري المخفي -->
         <div id="admin-secret" class="input-group hidden">
             <label style="color:var(--admin)">رمز الإدارة السري</label>
-            <input type="password" id="admin-code" placeholder="أدخل الرمز الخاص">
+            <input type="password" id="admin-code" placeholder="أدخل 7480">
         </div>
         <div class="input-group"><label>الاسم الكامل</label><input type="text" id="reg-name"></div>
         <div class="input-group"><label>كلمة المرور</label><input type="password" id="reg-pass"></div>
@@ -52,7 +51,7 @@
         <button style="background:none; color:blue; text-decoration:underline;" onclick="showScreen('login-screen')">العودة للدخول</button>
     </div>
 
-    <!-- 3. لوحة تحكم الإدارة (لإنشاء رئيس المجموعة) -->
+    <!-- 3. لوحة تحكم الإدارة -->
     <div id="admin-dashboard" class="card hidden">
         <button class="logout-btn" onclick="location.reload()">خروج</button>
         <span class="badge" style="background:var(--admin)">لوحة الإدارة</span>
@@ -62,7 +61,7 @@
         <button class="btn-red" onclick="createChief()">اعتماد رئيس المجموعة</button>
     </div>
 
-    <!-- 4. لوحة تحكم رئيس المجموعة (إضافة مبادرات) -->
+    <!-- 4. لوحة رئيس المجموعة -->
     <div id="chief-dashboard" class="card hidden">
         <button class="logout-btn" onclick="location.reload()">خروج</button>
         <span class="badge" style="background:var(--chief)">رئيس المجموعة</span>
@@ -72,21 +71,18 @@
         <button class="btn-green" onclick="addInitiative()">نشر المبادرة للمتطوعين</button>
     </div>
 
-    <!-- 5. واجهة المتطوع (مشاهدة المبادرات) -->
+    <!-- 5. واجهة المتطوع -->
     <div id="vol-dashboard" class="card hidden">
         <button class="logout-btn" onclick="location.reload()">خروج</button>
         <span class="badge" style="background:var(--vol)">حساب متطوع</span>
         <h2 id="vol-welcome"></h2>
-        <hr>
         <h3 style="text-align:right">المبادرات المتاحة:</h3>
-        <div id="initiatives-list">
-            <p style="color:#666; text-align:center;">لا توجد مبادرات منشورة حالياً.</p>
-        </div>
+        <div id="initiatives-list"></div>
     </div>
 
     <script>
-        // تخزين مؤقت للبيانات
-        let savedChief = JSON.parse(localStorage.getItem('chiefAccount'));
+        // مصفوفة المستخدمين والمبادرات
+        let users = JSON.parse(localStorage.getItem('allUsers')) || [];
         let initiatives = JSON.parse(localStorage.getItem('initiatives')) || [];
 
         function showScreen(id) {
@@ -101,27 +97,45 @@
 
         function handleSignup() {
             const role = document.getElementById('reg-role').value;
+            const name = document.getElementById('reg-name').value;
+            const pass = document.getElementById('reg-pass').value;
             const code = document.getElementById('admin-code').value;
+
+            if(!name || !pass) return alert("أكمل البيانات!");
+
             if(role === 'admin' && code !== '7480') {
                 alert("رمز الإدارة خاطئ!");
                 return;
             }
-            alert("تم التسجيل بنجاح! سجل دخولك الآن.");
+
+            // حفظ المستخدم الجديد مع نوع حسابه (Role)
+            const newUser = { name, pass, role };
+            users.push(newUser);
+            localStorage.setItem('allUsers', JSON.stringify(users));
+
+            alert("تم التسجيل بنجاح! نوع الحساب: " + (role === 'admin' ? 'إدارة' : 'متطوع'));
             showScreen('login-screen');
         }
 
         function handleLogin() {
-            const user = document.getElementById('login-user').value;
-            const pass = document.getElementById('login-pass').value;
+            const userIn = document.getElementById('login-user').value;
+            const passIn = document.getElementById('login-pass').value;
 
-            if (user === "ادارة" || user === "الإدارة") {
-                showScreen('admin-dashboard');
-            } else if (savedChief && user === savedChief.name && pass === savedChief.pass) {
-                showScreen('chief-dashboard');
+            // البحث عن المستخدم في القائمة المخزنة
+            const foundUser = users.find(u => u.name === userIn && u.pass === passIn);
+
+            if (foundUser) {
+                if (foundUser.role === 'admin') {
+                    showScreen('admin-dashboard');
+                } else if (foundUser.role === 'chief') {
+                    showScreen('chief-dashboard');
+                } else {
+                    showScreen('vol-dashboard');
+                    document.getElementById('vol-welcome').innerText = "أهلاً بك يا " + foundUser.name;
+                    renderInitiatives();
+                }
             } else {
-                showScreen('vol-dashboard');
-                document.getElementById('vol-welcome').innerText = "أهلاً بك يا " + user;
-                renderInitiatives();
+                alert("اسم المستخدم أو كلمة المرور غير صحيحة!");
             }
         }
 
@@ -130,9 +144,9 @@
             const pass = document.getElementById('chief-pass').value;
             if(!name || !pass) return alert("أكمل البيانات!");
             
-            const chief = { name, pass };
-            localStorage.setItem('chiefAccount', JSON.stringify(chief));
-            savedChief = chief;
+            // إضافة رئيس المجموعة لقائمة المستخدمين العامة بنوع "chief"
+            users.push({ name, pass, role: 'chief' });
+            localStorage.setItem('allUsers', JSON.stringify(users));
             alert("تم إنشاء حساب رئيس المجموعة بنجاح!");
         }
 
@@ -144,19 +158,12 @@
             initiatives.push({ title, desc });
             localStorage.setItem('initiatives', JSON.stringify(initiatives));
             alert("تم نشر المبادرة للمتطوعين!");
-            document.getElementById('init-title').value = "";
-            document.getElementById('init-desc').value = "";
         }
 
         function renderInitiatives() {
             const list = document.getElementById('initiatives-list');
-            if(initiatives.length === 0) return;
-            list.innerHTML = initiatives.map(i => `
-                <div class="init-card">
-                    <strong>${i.title}</strong>
-                    <p style="margin:5px 0; font-size:14px; color:#444;">${i.desc}</p>
-                </div>
-            `).reverse().join(''); // عرض الأحدث أولاً
+            list.innerHTML = initiatives.length === 0 ? '<p>لا توجد مبادرات حالياً.</p>' : 
+                initiatives.map(i => `<div class="init-card"><strong>${i.title}</strong><p>${i.desc}</p></div>`).reverse().join('');
         }
     </script>
 </body>
