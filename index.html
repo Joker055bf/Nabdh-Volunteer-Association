@@ -3,167 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الإدارة المتطور</title>
+    <title>منصة نبض التطوعية</title>
     <style>
-        :root { --admin: #dc2626; --chief: #059669; --vol: #2563eb; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; position: relative; }
-        h2 { text-align: center; color: #333; }
-        .input-group { text-align: right; margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; color: white; font-size: 16px; }
-        .btn-blue { background: var(--vol); } .btn-red { background: var(--admin); } .btn-green { background: var(--chief); }
-        .logout-btn { position: absolute; top: 10px; left: 10px; background: #6b7280; padding: 5px 12px; font-size: 12px; width: auto; margin: 0; }
-        .hidden { display: none; }
-        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; color: white; margin-bottom: 10px; }
-        .init-card { background: #f8fafc; border-right: 5px solid var(--chief); padding: 15px; margin-top: 15px; border-radius: 8px; text-align: right; }
+        /* الألوان الأساسية للمنصة */
+        :root {
+            --primary: #059669; /* أخضر احترافي */
+            --primary-dark: #047857;
+            --secondary: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; background-color: var(--bg-color); color: var(--text-main); }
+
+        /* شريط التنقل العلوي */
+        .navbar { background: var(--card-bg); padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .navbar h1 { margin: 0; font-size: 22px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .role-badge { background: #e0f2fe; color: #0369a1; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+        .btn-logout { background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-logout:hover { background: #dc2626; }
+
+        /* الحاويات الأساسية */
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .auth-container { max-width: 400px; margin: 80px auto; background: var(--card-bg); padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        
+        /* النصوص والمدخلات */
+        h2 { margin-top: 0; color: var(--secondary); text-align: center; margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--text-main); }
+        input, select, textarea { width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; transition: 0.3s; background: #f8fafc; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; background: white; box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1); }
+        
+        /* الأزرار */
+        .btn-main { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-main:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-link { background: none; border: none; color: var(--primary); cursor: pointer; font-weight: bold; text-decoration: none; padding: 0; font-size: 14px; }
+        
+        /* لوحات التحكم */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border); padding-bottom: 15px; }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 15px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); transition: 0.2s; }
+        .btn-action:hover { background: var(--primary-dark); }
+
+        /* البطاقات (المبادرات) */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .card:hover { box-shadow: 0 10px 15px rgba(0,0,0,0.05); border-color: #cbd5e1; }
+        .card-title { font-size: 18px; font-weight: bold; color: var(--secondary); margin: 0 0 10px 0; }
+        .card-desc { color: var(--text-light); font-size: 14px; line-height: 1.6; margin-bottom: 15px; }
+        .card-meta { font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 10px; }
+
+        /* النوافذ المنبثقة (Modals) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: white; padding: 30px; border-radius: 16px; width: 100%; max-width: 450px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: modalFadeIn 0.3s ease; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { margin: 0; color: var(--secondary); }
+        .btn-close { background: none; border: none; font-size: 24px; color: var(--text-light); cursor: pointer; line-height: 1; }
+        @keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* أوامر الإخفاء */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
 
-    <!-- 1. واجهة تسجيل الدخول -->
-    <div id="login-screen" class="card">
-        <h2>تسجيل الدخول</h2>
-        <div class="input-group"><label>الاسم</label><input type="text" id="login-user"></div>
-        <div class="input-group"><label>كلمة المرور</label><input type="password" id="login-pass"></div>
-        <button class="btn-blue" onclick="handleLogin()">دخول</button>
-        <p style="text-align:center">ليس لديك حساب؟ <a href="#" onclick="showScreen('signup-screen')">سجل الآن</a></p>
-    </div>
-
-    <!-- 2. واجهة إنشاء حساب -->
-    <div id="signup-screen" class="card hidden">
-        <h2>إنشاء حساب جديد</h2>
-        <div class="input-group">
-            <label>نوع الحساب</label>
-            <select id="reg-role" onchange="checkAdminField()">
-                <option value="volunteer">متطوع</option>
-                <option value="admin">الإدارة</option>
-            </select>
+    <div id="auth-wrapper">
+        <div class="auth-container" id="login-view">
+            <h2>تسجيل الدخول للمنصة</h2>
+            <div class="form-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="login-user" placeholder="أدخل اسمك">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="login-pass" placeholder="••••••••">
+            </div>
+            <button class="btn-main" onclick="handleLogin()">تسجيل الدخول</button>
+            <p class="text-center" style="margin-top: 20px; color: var(--text-light);">
+                ليس لديك حساب؟ <button class="btn-link" onclick="toggleAuth('signup')">إنشاء حساب متطوع/إدارة</button>
+            </p>
         </div>
-        <div id="admin-secret" class="input-group hidden">
-            <label style="color:var(--admin)">رمز الإدارة السري</label>
-            <input type="password" id="admin-code" placeholder="أدخل 7480">
+
+        <div class="auth-container hidden" id="signup-view">
+            <h2>إنشاء حساب جديد</h2>
+            <div class="form-group">
+                <label>صفة الحساب</label>
+                <select id="reg-role" onchange="toggleAdminCode()">
+                    <option value="volunteer">متطوع (ميداني)</option>
+                    <option value="admin">الإدارة العامة</option>
+                </select>
+            </div>
+            <div class="form-group hidden" id="admin-code-group">
+                <label style="color: #ef4444;">الرمز السري للإدارة</label>
+                <input type="password" id="admin-code" placeholder="أدخل الرمز السري">
+            </div>
+            <div class="form-group">
+                <label>الاسم الثلاثي</label>
+                <input type="text" id="reg-name" placeholder="اسمك الكامل">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="reg-pass" placeholder="اختر كلمة مرور قوية">
+            </div>
+            <button class="btn-main" onclick="handleSignup()">تأكيد الإنشاء</button>
+            <p class="text-center" style="margin-top: 20px;">
+                <button class="btn-link" onclick="toggleAuth('login')">العودة لتسجيل الدخول</button>
+            </p>
         </div>
-        <div class="input-group"><label>الاسم الكامل</label><input type="text" id="reg-name"></div>
-        <div class="input-group"><label>كلمة المرور</label><input type="password" id="reg-pass"></div>
-        <button class="btn-blue" onclick="handleSignup()">تأكيد التسجيل</button>
-        <button style="background:none; color:blue; text-decoration:underline;" onclick="showScreen('login-screen')">العودة للدخول</button>
     </div>
 
-    <!-- 3. لوحة تحكم الإدارة -->
-    <div id="admin-dashboard" class="card hidden">
-        <button class="logout-btn" onclick="location.reload()">خروج</button>
-        <span class="badge" style="background:var(--admin)">لوحة الإدارة</span>
-        <h3>إنشاء حساب رئيس مجموعة</h3>
-        <div class="input-group"><label>اسم رئيس المجموعة</label><input type="text" id="chief-name"></div>
-        <div class="input-group"><label>كلمة مرور الرئيس</label><input type="password" id="chief-pass"></div>
-        <button class="btn-red" onclick="createChief()">اعتماد رئيس المجموعة</button>
+    <div id="app-wrapper" class="hidden">
+        
+        <nav class="navbar">
+            <h1>💓 منصة نبض التطوعية</h1>
+            <div class="user-info">
+                <span class="role-badge" id="nav-role">متطوع</span>
+                <span id="nav-name" style="font-weight: bold;">الاسم</span>
+                <button class="btn-logout" onclick="location.reload()">تسجيل خروج</button>
+            </div>
+        </nav>
+
+        <div class="container">
+            
+            <div id="panel-admin" class="hidden">
+                <div class="dashboard-header">
+                    <h2>لوحة التحكم الإدارية</h2>
+                    <button class="btn-action" onclick="openModal('modal-chief')">
+                        <span>➕</span> إضافة رئيس مجموعة
+                    </button>
+                </div>
+                <div class="grid" id="chiefs-list">
+                    </div>
+            </div>
+
+            <div id="panel-chief" class="hidden">
+                <div class="dashboard-header">
+                    <h2>إدارة المبادرات التطوعية</h2>
+                    <button class="btn-action" onclick="openModal('modal-init')">
+                        <span>📝</span> صياغة مبادرة جديدة
+                    </button>
+                </div>
+                <div class="grid" id="chief-initiatives-list"></div>
+            </div>
+
+            <div id="panel-vol" class="hidden">
+                <div class="dashboard-header">
+                    <h2>الفرص التطوعية المتاحة</h2>
+                </div>
+                <div class="grid" id="vol-initiatives-list"></div>
+            </div>
+
+        </div>
     </div>
 
-    <!-- 4. لوحة رئيس المجموعة -->
-    <div id="chief-dashboard" class="card hidden">
-        <button class="logout-btn" onclick="location.reload()">خروج</button>
-        <span class="badge" style="background:var(--chief)">رئيس المجموعة</span>
-        <h3>إضافة مبادرة جديدة</h3>
-        <div class="input-group"><label>عنوان المبادرة</label><input type="text" id="init-title"></div>
-        <div class="input-group"><label>التفاصيل</label><textarea id="init-desc" rows="3"></textarea></div>
-        <button class="btn-green" onclick="addInitiative()">نشر المبادرة للمتطوعين</button>
-    </div>
+    <div class="modal-overlay" id="main-overlay">
+        
+        <div class="modal hidden" id="modal-chief">
+            <div class="modal-header">
+                <h3>إضافة رئيس مجموعة جديد</h3>
+                <button class="btn-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label>اسم رئيس المجموعة</label>
+                <input type="text" id="new-chief-name" placeholder="الاسم الكامل">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور المؤقتة</label>
+                <input type="password" id="new-chief-pass" placeholder="تعيين كلمة مرور">
+            </div>
+            <button class="btn-main" onclick="saveChief()">حفظ واعتماد</button>
+        </div>
 
-    <!-- 5. واجهة المتطوع -->
-    <div id="vol-dashboard" class="card hidden">
-        <button class="logout-btn" onclick="location.reload()">خروج</button>
-        <span class="badge" style="background:var(--vol)">حساب متطوع</span>
-        <h2 id="vol-welcome"></h2>
-        <h3 style="text-align:right">المبادرات المتاحة:</h3>
-        <div id="initiatives-list"></div>
+        <div class="modal hidden" id="modal-init">
+            <div class="modal-header">
+                <h3>إطلاق مبادرة جديدة</h3>
+                <button class="btn-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label>عنوان المبادرة</label>
+                <input type="text" id="new-init-title" placeholder="مثال: تنظيف شواطئ المدينة">
+            </div>
+            <div class="form-group">
+                <label>وصف المهام</label>
+                <textarea id="new-init-desc" rows="4" placeholder="اشرح تفاصيل المبادرة للمتطوعين..."></textarea>
+            </div>
+            <button class="btn-main" onclick="saveInitiative()">نشر المبادرة</button>
+        </div>
+
     </div>
 
     <script>
-        // مصفوفة المستخدمين والمبادرات
-        let users = JSON.parse(localStorage.getItem('allUsers')) || [];
-        let initiatives = JSON.parse(localStorage.getItem('initiatives')) || [];
+        // قاعدة البيانات المؤقتة
+        let db_users = JSON.parse(localStorage.getItem('v_users')) || [];
+        let db_initiatives = JSON.parse(localStorage.getItem('v_inits')) || [];
+        let currentUser = null;
 
-        function showScreen(id) {
-            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+        // وظائف الواجهة والتنقل
+        function toggleAuth(view) {
+            document.getElementById('login-view').classList.toggle('hidden', view !== 'login');
+            document.getElementById('signup-view').classList.toggle('hidden', view !== 'signup');
         }
 
-        function checkAdminField() {
-            const role = document.getElementById('reg-role').value;
-            document.getElementById('admin-secret').classList.toggle('hidden', role !== 'admin');
+        function toggleAdminCode() {
+            const isadmin = document.getElementById('reg-role').value === 'admin';
+            document.getElementById('admin-code-group').classList.toggle('hidden', !isadmin);
         }
 
+        function openModal(modalId) {
+            document.getElementById('main-overlay').style.display = 'flex';
+            document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('main-overlay').style.display = 'none';
+            // تفريغ الحقول عند الإغلاق
+            document.querySelectorAll('.modal input, .modal textarea').forEach(el => el.value = '');
+        }
+
+        // عمليات الدخول والتسجيل
         function handleSignup() {
             const role = document.getElementById('reg-role').value;
-            const name = document.getElementById('reg-name').value;
+            const name = document.getElementById('reg-name').value.trim();
             const pass = document.getElementById('reg-pass').value;
             const code = document.getElementById('admin-code').value;
 
-            if(!name || !pass) return alert("أكمل البيانات!");
+            if(!name || !pass) return alert("الرجاء إكمال كافة الحقول.");
+            if(role === 'admin' && code !== '7480') return alert("رمز الإدارة السري غير صحيح!");
+            
+            // التحقق من عدم تكرار الاسم
+            if(db_users.some(u => u.name === name)) return alert("هذا الاسم مسجل مسبقاً، اختر اسماً آخر.");
 
-            if(role === 'admin' && code !== '7480') {
-                alert("رمز الإدارة خاطئ!");
-                return;
-            }
-
-            // حفظ المستخدم الجديد مع نوع حسابه (Role)
-            const newUser = { name, pass, role };
-            users.push(newUser);
-            localStorage.setItem('allUsers', JSON.stringify(users));
-
-            alert("تم التسجيل بنجاح! نوع الحساب: " + (role === 'admin' ? 'إدارة' : 'متطوع'));
-            showScreen('login-screen');
+            db_users.push({ name, pass, role });
+            localStorage.setItem('v_users', JSON.stringify(db_users));
+            alert("تم إنشاء الحساب بنجاح. يمكنك تسجيل الدخول الآن.");
+            toggleAuth('login');
         }
 
         function handleLogin() {
-            const userIn = document.getElementById('login-user').value;
-            const passIn = document.getElementById('login-pass').value;
+            const name = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value;
 
-            // البحث عن المستخدم في القائمة المخزنة
-            const foundUser = users.find(u => u.name === userIn && u.pass === passIn);
-
-            if (foundUser) {
-                if (foundUser.role === 'admin') {
-                    showScreen('admin-dashboard');
-                } else if (foundUser.role === 'chief') {
-                    showScreen('chief-dashboard');
-                } else {
-                    showScreen('vol-dashboard');
-                    document.getElementById('vol-welcome').innerText = "أهلاً بك يا " + foundUser.name;
-                    renderInitiatives();
-                }
+            const user = db_users.find(u => u.name === name && u.pass === pass);
+            
+            if (user) {
+                currentUser = user;
+                launchApp();
             } else {
-                alert("اسم المستخدم أو كلمة المرور غير صحيحة!");
+                alert("بيانات الدخول غير صحيحة. تأكد من الاسم وكلمة المرور.");
             }
         }
 
-        function createChief() {
-            const name = document.getElementById('chief-name').value;
-            const pass = document.getElementById('chief-pass').value;
-            if(!name || !pass) return alert("أكمل البيانات!");
+        // تشغيل النظام الداخلي
+        function launchApp() {
+            document.getElementById('auth-wrapper').classList.add('hidden');
+            document.getElementById('app-wrapper').classList.remove('hidden');
             
-            // إضافة رئيس المجموعة لقائمة المستخدمين العامة بنوع "chief"
-            users.push({ name, pass, role: 'chief' });
-            localStorage.setItem('allUsers', JSON.stringify(users));
-            alert("تم إنشاء حساب رئيس المجموعة بنجاح!");
+            // ضبط الشريط العلوي
+            document.getElementById('nav-name').innerText = currentUser.name;
+            let roleName = currentUser.role === 'admin' ? 'الإدارة' : (currentUser.role === 'chief' ? 'رئيس مجموعة' : 'متطوع');
+            document.getElementById('nav-role').innerText = roleName;
+
+            // إظهار اللوحة المناسبة
+            document.getElementById('panel-admin').classList.add('hidden');
+            document.getElementById('panel-chief').classList.add('hidden');
+            document.getElementById('panel-vol').classList.add('hidden');
+
+            if(currentUser.role === 'admin') {
+                document.getElementById('panel-admin').classList.remove('hidden');
+                renderAdminView();
+            } else if(currentUser.role === 'chief') {
+                document.getElementById('panel-chief').classList.remove('hidden');
+                renderInitiatives('chief-initiatives-list');
+            } else {
+                document.getElementById('panel-vol').classList.remove('hidden');
+                renderInitiatives('vol-initiatives-list');
+            }
         }
 
-        function addInitiative() {
-            const title = document.getElementById('init-title').value;
-            const desc = document.getElementById('init-desc').value;
-            if(!title || !desc) return alert("اكتب تفاصيل المبادرة!");
+        // وظائف الإدارة (إضافة رئيس)
+        function saveChief() {
+            const name = document.getElementById('new-chief-name').value.trim();
+            const pass = document.getElementById('new-chief-pass').value;
+            
+            if(!name || !pass) return alert("أكمل بيانات رئيس المجموعة!");
+            if(db_users.some(u => u.name === name)) return alert("يوجد مستخدم بهذا الاسم بالفعل!");
 
-            initiatives.push({ title, desc });
-            localStorage.setItem('initiatives', JSON.stringify(initiatives));
-            alert("تم نشر المبادرة للمتطوعين!");
+            db_users.push({ name, pass, role: 'chief' });
+            localStorage.setItem('v_users', JSON.stringify(db_users));
+            
+            closeModal();
+            renderAdminView();
+            alert("تم اعتماد رئيس المجموعة بنجاح.");
         }
 
-        function renderInitiatives() {
-            const list = document.getElementById('initiatives-list');
-            list.innerHTML = initiatives.length === 0 ? '<p>لا توجد مبادرات حالياً.</p>' : 
-                initiatives.map(i => `<div class="init-card"><strong>${i.title}</strong><p>${i.desc}</p></div>`).reverse().join('');
+        function renderAdminView() {
+            const list = document.getElementById('chiefs-list');
+            const chiefs = db_users.filter(u => u.role === 'chief');
+            
+            if(chiefs.length === 0) {
+                list.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#64748b;">لم يتم إضافة أي رؤساء مجموعات حتى الآن.</p>`;
+                return;
+            }
+
+            list.innerHTML = chiefs.map(c => `
+                <div class="card" style="border-right: 4px solid var(--primary);">
+                    <div class="card-title">👤 ${c.name}</div>
+                    <div class="card-desc">حساب رئيس مجموعة نشط</div>
+                </div>
+            `).join('');
+        }
+
+        // وظائف المبادرات
+        function saveInitiative() {
+            const title = document.getElementById('new-init-title').value.trim();
+            const desc = document.getElementById('new-init-desc').value.trim();
+            const date = new Date().toLocaleDateString('ar-SA');
+
+            if(!title || !desc) return alert("أكمل بيانات المبادرة!");
+
+            db_initiatives.push({ title, desc, date, author: currentUser.name });
+            localStorage.setItem('v_inits', JSON.stringify(db_initiatives));
+            
+            closeModal();
+            renderInitiatives('chief-initiatives-list');
+            alert("تم نشر المبادرة بنجاح!");
+        }
+
+        function renderInitiatives(containerId) {
+            const list = document.getElementById(containerId);
+            if(db_initiatives.length === 0) {
+                list.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#64748b; padding:40px 0;">لا توجد فرص تطوعية متاحة حالياً.</p>`;
+                return;
+            }
+
+            // عرض الأحدث أولاً
+            list.innerHTML = [...db_initiatives].reverse().map(init => `
+                <div class="card">
+                    <h3 class="card-title">${init.title}</h3>
+                    <p class="card-desc">${init.desc}</p>
+                    <div class="card-meta">
+                        <span>نشر بواسطة: ${init.author}</span>
+                        <span>📅 ${init.date}</span>
+                    </div>
+                </div>
+            `).join('');
         }
     </script>
 </body>
