@@ -3,31 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الدخول والتسجيل</title>
+    <title>منصتي | دخول وتسجيل</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef2f3; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 90%; max-width: 400px; position: relative; text-align: center; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; position: relative; text-align: center; }
         
+        h2 { color: #333; margin-bottom: 25px; }
         .input-group { text-align: right; margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         
         .main-btn { width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
         .main-btn:hover { background: #4338ca; }
         
-        .link-btn { background: none; border: none; color: #4f46e5; cursor: pointer; text-decoration: underline; font-size: 14px; margin-top: 15px; }
-        .logout-btn { position: absolute; top: 15px; left: 15px; background: #ef4444; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
-
-        /* الأقسام المخفية افتراضياً */
-        #signup-section, #home-section, #member-code-div { display: none; }
+        .footer-text { margin-top: 20px; font-size: 14px; color: #666; }
+        .link-btn { background: none; border: none; color: #4f46e5; cursor: pointer; font-weight: bold; text-decoration: underline; padding: 0; font-size: 14px; }
         
-        .radio-group { display: flex; gap: 15px; justify-content: center; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+        .logout-btn { position: absolute; top: 15px; left: 15px; background: #ef4444; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+
+        /* خيارات المتطوع والعضو */
+        .role-box { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; background: #f8f9fa; padding: 10px; border-radius: 8px; }
+        
+        /* إخفاء الأقسام */
+        #signup-area, #home-area, #member-code-div { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- 1. واجهة تسجيل الدخول (تظهر أولاً) -->
-    <div class="container" id="login-section">
+    <!-- 1. واجهة تسجيل الدخول (أول شيء يظهر) -->
+    <div class="card" id="login-area">
         <h2>تسجيل الدخول</h2>
         <div class="input-group">
             <label>الاسم</label>
@@ -37,95 +41,102 @@
             <label>كلمة المرور</label>
             <input type="password" id="login-pass" placeholder="••••••••">
         </div>
-        <button class="main-btn" onclick="handleLogin()">دخول</button>
-        <button class="link-btn" onclick="showPage('signup-section')">ليس لديك حساب؟ سجل الآن</button>
+        <button class="main-btn" onclick="processLogin()">دخول</button>
+        <div class="footer-text">
+            ليس لديك حساب؟ <button class="link-btn" onclick="showSignup()">سجل الآن</button>
+        </div>
     </div>
 
     <!-- 2. واجهة إنشاء حساب جديد -->
-    <div class="container" id="signup-section">
+    <div class="card" id="signup-area">
         <h2>إنشاء حساب جديد</h2>
         <div class="input-group">
-            <label>سجل كـ:</label>
-            <div class="radio-group">
-                <label><input type="radio" name="role" value="v" checked onclick="toggleCode(false)"> متطوع</label>
-                <label><input type="radio" name="role" value="m" onclick="toggleCode(true)"> عضو</label>
+            <label>نوع الحساب</label>
+            <div class="role-box">
+                <label><input type="radio" name="role" value="v" checked onclick="toggleMemberField(false)"> متطوع</label>
+                <label><input type="radio" name="role" value="m" onclick="toggleMemberField(true)"> عضو</label>
             </div>
         </div>
         <div class="input-group">
-            <label>الاسم</label>
-            <input type="text" id="reg-user" placeholder="اختار اسم مستخدم">
+            <label>الاسم الكامل</label>
+            <input type="text" id="reg-user" placeholder="اكتب اسمك">
         </div>
         <div class="input-group">
             <label>كلمة المرور</label>
-            <input type="password" id="reg-pass" placeholder="كلمة المرور">
+            <input type="password" id="reg-pass" placeholder="اختر كلمة مرور">
         </div>
         <div class="input-group" id="member-code-div">
-            <label style="color:red">الرمز السري (7480)</label>
+            <label style="color:red">الرمز السري للعضو (7480)</label>
             <input type="text" id="member-code" placeholder="أدخل الرمز">
         </div>
-        <button class="main-btn" onclick="handleSignup()">سجل وافتح الحساب</button>
-        <button class="link-btn" onclick="showPage('login-section')">لديك حساب؟ سجل دخول</button>
+        <button class="main-btn" onclick="processSignup()">تأكيد التسجيل والدخول</button>
+        <div class="footer-text">
+            لديك حساب بالفعل؟ <button class="link-btn" onclick="showLogin()">تسجيل دخول</button>
+        </div>
     </div>
 
-    <!-- 3. واجهة الصفحة الرئيسية (بعد الدخول) -->
-    <div class="container" id="home-section">
+    <!-- 3. واجهة الصفحة الرئيسية (بعد النجاح) -->
+    <div class="card" id="home-area">
         <button class="logout-btn" onclick="location.reload()">خروج</button>
-        <h1 style="font-size: 50px;">👋</h1>
-        <h2>مرحباً بك يا <span id="user-display" style="color:#4f46e5"></span></h2>
-        <p>لقد نجحت في الدخول إلى نظامنا.</p>
-        <div id="type-badge" style="display:inline-block; padding:5px 15px; border-radius:20px; background:#dcfce7; color:#166534; font-weight:bold;"></div>
+        <div style="font-size: 50px; margin-bottom: 10px;">👤</div>
+        <h2 id="welcome-name"></h2>
+        <p>مرحباً بك في لوحة التحكم الخاصة بك كـ <span id="user-role-text" style="font-weight:bold; color:#4f46e5;"></span></p>
     </div>
 
     <script>
-        // دالة التنقل بين الصفحات
-        function showPage(pageId) {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('signup-section').style.display = 'none';
-            document.getElementById('home-section').style.display = 'none';
-            document.getElementById(pageId).style.display = 'block';
+        // وظائف التنقل
+        function showSignup() {
+            document.getElementById('login-area').style.display = 'none';
+            document.getElementById('signup-area').style.display = 'block';
         }
 
-        // إظهار حقل الرمز للعضو
-        function toggleCode(show) {
-            document.getElementById('member-code-div').style.display = show ? 'block' : 'none';
+        function showLogin() {
+            document.getElementById('signup-area').style.display = 'none';
+            document.getElementById('login-area').style.display = 'block';
         }
 
-        // وظيفة تسجيل الدخول (للتجربة حالياً)
-        function handleLogin() {
+        function toggleMemberField(isMember) {
+            document.getElementById('member-code-div').style.display = isMember ? 'block' : 'none';
+        }
+
+        // تسجيل الدخول العادي
+        function processLogin() {
             const user = document.getElementById('login-user').value;
             const pass = document.getElementById('login-pass').value;
             if(user && pass) {
-                enterSite(user, "مستخدم");
+                goToHome(user, "مستخدم");
             } else {
-                alert("يرجى إدخال البيانات");
+                alert("يرجى تعبئة بيانات الدخول");
             }
         }
 
-        // وظيفة إنشاء الحساب والدخول الفوري
-        function handleSignup() {
+        // إنشاء حساب جديد
+        function processSignup() {
             const user = document.getElementById('reg-user').value;
             const pass = document.getElementById('reg-pass').value;
             const isMember = document.querySelector('input[name="role"]:checked').value === 'm';
             const code = document.getElementById('member-code').value;
 
             if(!user || !pass) {
-                alert("أكمل البيانات أولاً");
+                alert("يرجى إكمال الحقول");
                 return;
             }
 
             if(isMember && code !== '7480') {
-                alert("الرمز السري للعضوية خطأ!");
+                alert("خطأ: الرمز السري للعضو هو 7480");
                 return;
             }
 
-            enterSite(user, isMember ? "عضو" : "متطوع");
+            goToHome(user, isMember ? "عضو" : "متطوع");
         }
 
-        // الانتقال للداخل
-        function enterSite(name, type) {
-            showPage('home-section');
-            document.getElementById('user-display').innerText = name;
-            document.getElementById('type-badge').innerText = type;
+        // الدخول للموقع
+        function goToHome(name, role) {
+            document.getElementById('login-area').style.display = 'none';
+            document.getElementById('signup-area').style.display = 'none';
+            document.getElementById('home-area').style.display = 'block';
+            document.getElementById('welcome-name').innerText = "أهلاً " + name;
+            document.getElementById('user-role-text').innerText = role;
         }
     </script>
 
